@@ -156,6 +156,12 @@ td.act{white-space:nowrap}
   </section>
 
   <section class="card">
+    <header><h2 id="tK">Kg per day, all machines</h2><p>Total kg divided by the days with a report, on the same days as coils per day.</p></header>
+    <div class="legend" id="lgMonthK"></div>
+    <div class="plot" id="chK"></div>
+  </section>
+
+  <section class="card">
     <header><h2 id="tD">Coils per hour, all machines</h2><p>Average coils per 12-hour shift divided by 12.</p></header>
     <div class="legend" id="lgMonthD"></div>
     <div class="plot" id="chD"></div>
@@ -512,13 +518,16 @@ function render(){
   // coils
   const cl=line==='All'?LINES:[line], lname2=line==='All'?'all machines':line;
   const cpd=(l,m)=>{const t=DATA.mshifts.filter(r=>r[0]===m&&r[1]===l).reduce((a,r)=>a+(r[4]||0),0);return t?t/DAYS[m]:null};
+  const kpd=(l,m)=>{const t=DATA.rows.filter(r=>r[0]===m&&r[1]===l).reduce((a,r)=>a+r[3],0);return t?t/DAYS[m]:null};
   const cph=(l,m)=>{const s=DATA.mshifts.filter(r=>r[0]===m&&r[1]===l);const t=s.reduce((a,r)=>a+(r[4]||0),0);return t?t/s.length/12:null};
   const mleg=MON.map(m=>({c:ml(m),n:MFULL[m]}));
-  legend(document.getElementById('lgMonthC'),mleg); legend(document.getElementById('lgMonthD'),mleg);
+  legend(document.getElementById('lgMonthC'),mleg); legend(document.getElementById('lgMonthD'),mleg); legend(document.getElementById('lgMonthK'),mleg);
   const lcats=cl.map(l=>({label:l,tip:l+' ('+DESC[l]+')'}));
   document.getElementById('tC').textContent='Coils per day, '+lname2;
+  document.getElementById('tK').textContent='Kg per day, '+lname2;
   document.getElementById('tD').textContent='Coils per hour, '+lname2;
   drawBars(document.getElementById('chC'),lcats,MON.map(m=>({name:MFULL[m],color:ml(m),vals:cl.map(l=>cpd(l,m))})),{unit:'coils/day',d:1,height:280,aria:'Coils per day by machine and month'});
+  drawBars(document.getElementById('chK'),lcats,MON.map(m=>({name:MFULL[m],color:ml(m),vals:cl.map(l=>kpd(l,m))})),{unit:'kg/day',d:0,height:280,aria:'Kg per day by machine and month'});
   drawBars(document.getElementById('chD'),lcats,MON.map(m=>({name:MFULL[m],color:ml(m),vals:cl.map(l=>cph(l,m))})),{unit:'coils/hr',d:2,height:280,aria:'Coils per hour by machine and month'});
   const dates=DATA.reports.filter(r=>!r[1]).map(r=>r[0]).sort(), per={};
   DATA.mshifts.forEach(r=>{ if(!cl.includes(r[1]))return; const o2=per[r[3]]||(per[r[3]]={}); o2[r[1]]=(o2[r[1]]||0)+(r[4]||0); });
